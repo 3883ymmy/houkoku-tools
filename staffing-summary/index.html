@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'">
+<title>介護サービス情報公表・従業者集計ツール</title>
+<style>
+:root{color-scheme:light;--bg:#f6f8fb;--card:#fff;--ink:#1f2937;--muted:#667085;--line:#d8dee8;--accent:#1769aa;--accent2:#eaf3fb;--warn:#7a4b00;--warnbg:#fff6dd;--bad:#9b2c2c;--good:#176b3a}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.55}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}.hero{margin-bottom:18px}.hero h1{font-size:clamp(1.35rem,3vw,2rem);margin:0 0 6px}.hero p{margin:4px 0;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}.settings{display:flex;gap:14px;align-items:end;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:.88rem;color:var(--muted);font-weight:700}.field input,.field select{font:inherit;padding:9px 10px;border:1px solid #bfc8d5;border-radius:8px;background:white;min-height:42px}.field input[type=number]{width:140px}.hint{font-size:.88rem;color:var(--muted);margin-top:8px}.note{background:var(--warnbg);color:var(--warn);border:1px solid #efd68b;border-radius:10px;padding:10px 12px;font-size:.9rem}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}button{font:inherit;border:1px solid #aeb9c7;border-radius:9px;background:#fff;padding:9px 13px;cursor:pointer;min-height:42px}button.primary{background:var(--accent);border-color:var(--accent);color:white}button.danger{color:var(--bad)}button:focus,input:focus,select:focus{outline:3px solid rgba(23,105,170,.18);outline-offset:1px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;min-width:900px;background:#fff}th,td{border-bottom:1px solid var(--line);padding:8px 9px;text-align:center;vertical-align:middle}th{background:#f1f5f9;font-size:.88rem;white-space:nowrap}td select,td input{font:inherit;padding:7px 8px;border:1px solid #c4ccd8;border-radius:7px;background:white}td input[type=number]{width:92px}.left{text-align:left}.small{font-size:.82rem;color:var(--muted)}.status{font-weight:700}.status.full{color:var(--good)}.status.part{color:#8a4b00}.weekhours{font-variant-numeric:tabular-nums}.rolehours{width:105px!important}.hidden{display:none!important}.summary table{min-width:760px}.summary td,.summary th{font-variant-numeric:tabular-nums}.summary .job{font-weight:700;text-align:left}.zero{color:#98a2b3}.resultbox{white-space:pre-wrap;background:#0f172a;color:#e5edf7;border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem;overflow:auto;max-height:280px}.footer{font-size:.82rem;color:var(--muted);margin-top:18px}.warnrow{background:#fffaf0}.err{color:var(--bad);font-size:.82rem;margin-top:4px}
+@media(max-width:640px){main{padding:16px 10px 36px}.card{padding:12px}.field input[type=number]{width:100%}.settings{display:grid;grid-template-columns:1fr}.toolbar button{flex:1 1 45%}}
+@media print{body{background:white}.hero,.toolbar,.entry-card,.note,.footer{display:none!important}.card{border:0;padding:0}.summary{margin:0}.table-wrap{border:0}table{min-width:0;font-size:10pt}th,td{padding:5px}}
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1>介護サービス情報公表・従業者集計ツール</h1>
+    <p>職種ごとの勤務情報を入れると、常勤・非常勤、専従・兼務、常勤換算人数を自動集計します。</p>
+    <p>データはこのブラウザ内だけで計算し、外部送信しません。</p>
+  </section>
+
+  <section class="card">
+    <div class="settings">
+      <div class="field">
+        <label for="standardHours">常勤職員が勤務すべき1週間の時間数</label>
+        <input id="standardHours" type="number" min="1" max="80" step="0.25" value="32" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label for="precision">常勤換算の表示</label>
+        <select id="precision">
+          <option value="2" selected>小数第2位まで</option>
+          <option value="1">小数第1位まで</option>
+        </select>
+      </div>
+    </div>
+    <div class="hint">この事業所の資料では32時間になっているため、初期値を32時間にしています。</div>
+  </section>
+
+  <section class="card entry-card">
+    <h2 style="font-size:1.08rem;margin:0 0 8px">職員の入力</h2>
+    <div class="note">「1回あたり勤務時間」は休憩を除いた実勤務時間で入力してください。兼務者は必要に応じて「この職種に充てる週時間」を入れると、常勤判定は総勤務時間、常勤換算は職種別時間で計算します。</div>
+    <div class="toolbar">
+      <button type="button" class="primary" id="addRow">＋ 職員を追加</button>
+      <button type="button" id="copyResult">申請用数字をコピー</button>
+      <button type="button" id="downloadCsv">CSV保存</button>
+      <button type="button" id="printBtn">印刷</button>
+      <button type="button" class="danger" id="clearAll">全消去</button>
+    </div>
+    <div class="table-wrap">
+      <table aria-label="職員入力表">
+        <thead>
+          <tr>
+            <th>No.</th><th>職種</th><th>週何回</th><th>1回あたり勤務時間</th><th>週総勤務時間</th><th>専従／兼務</th><th>兼務時：この職種に充てる週時間</th><th>判定</th><th>常勤換算寄与</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div id="validation" class="err" aria-live="polite"></div>
+  </section>
+
+  <section class="card summary">
+    <h2 style="font-size:1.08rem;margin:0 0 8px">申請用集計</h2>
+    <div class="table-wrap">
+      <table aria-label="申請用集計表">
+        <thead><tr><th>職種</th><th>常勤 専従</th><th>常勤 兼務</th><th>非常勤 専従</th><th>非常勤 兼務</th><th>合計</th><th>常勤換算人数</th></tr></thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:1.08rem;margin:0 0 8px">コピー内容プレビュー</h2>
+    <div id="textResult" class="resultbox" aria-live="polite"></div>
+  </section>
+
+  <div class="footer">このツールは集計補助用です。実際の申請では、事業所の所定労働時間と職種ごとの専従・兼務の扱いを確認してください。</div>
+</main>
+<script>
+(function(){
+  'use strict';
+  const JOBS=['生活相談員','看護職員','介護職員','機能訓練指導員','歯科衛生士','管理栄養士','事務員','その他の従業者'];
+  const rowsEl=document.getElementById('rows');
+  const summaryBody=document.getElementById('summaryBody');
+  const standardHoursEl=document.getElementById('standardHours');
+  const precisionEl=document.getElementById('precision');
+  const textResult=document.getElementById('textResult');
+  const validation=document.getElementById('validation');
+  let rowSeq=0;
+
+  function n(v){ const x=Number(v); return Number.isFinite(x)?x:0; }
+  function clamp(x,min,max){ return Math.min(max,Math.max(min,x)); }
+  function roundTo(x,p){ const m=Math.pow(10,p); return Math.round((x+Number.EPSILON)*m)/m; }
+  function fmt(x,p){ const r=roundTo(x,p); return r.toFixed(p).replace(/\.?0+$/,''); }
+
+  function jobOptions(){ return JOBS.map(j=>'<option value="'+j+'">'+j+'</option>').join(''); }
+
+  function addRow(data={}){
+    rowSeq++;
+    const tr=document.createElement('tr');
+    tr.dataset.rowId=String(rowSeq);
+    tr.innerHTML=`
+      <td class="rownum"></td>
+      <td><select class="job" aria-label="職種">${jobOptions()}</select></td>
+      <td><input class="days" type="number" min="0" max="14" step="0.5" value="${data.days??''}" inputmode="decimal" aria-label="週勤務回数"></td>
+      <td><input class="hours" type="number" min="0" max="24" step="0.25" value="${data.hours??''}" inputmode="decimal" aria-label="1回あたり勤務時間"></td>
+      <td class="weekhours">0</td>
+      <td><select class="mode" aria-label="専従または兼務"><option value="専従">専従</option><option value="兼務">兼務</option></select></td>
+      <td><input class="rolehours" type="number" min="0" max="168" step="0.25" value="${data.rolehours??''}" inputmode="decimal" aria-label="この職種に充てる週時間" disabled placeholder="専従は不要"></td>
+      <td class="status part">非常勤</td>
+      <td class="fte">0</td>
+      <td><button type="button" class="remove" aria-label="この行を削除">削除</button></td>`;
+    if(data.job && JOBS.includes(data.job)) tr.querySelector('.job').value=data.job;
+    if(data.mode==='兼務') tr.querySelector('.mode').value='兼務';
+    rowsEl.appendChild(tr);
+    bindRow(tr);
+    refresh();
+  }
+
+  function bindRow(tr){
+    tr.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',refresh));
+    tr.querySelector('.mode').addEventListener('change',()=>{
+      const rh=tr.querySelector('.rolehours');
+      const isDual=tr.querySelector('.mode').value==='兼務';
+      rh.disabled=!isDual;
+      if(!isDual) rh.value='';
+      refresh();
+    });
+    tr.querySelector('.remove').addEventListener('click',()=>{tr.remove(); if(!rowsEl.children.length)addRow(); refresh();});
+  }
+
+  function collect(){
+    const standard=clamp(n(standardHoursEl.value),1,80);
+    const p=Number(precisionEl.value)||2;
+    const warnings=[];
+    const entries=[];
+    [...rowsEl.querySelectorAll('tr')].forEach((tr,i)=>{
+      tr.querySelector('.rownum').textContent=String(i+1);
+      const job=tr.querySelector('.job').value;
+      const days=clamp(n(tr.querySelector('.days').value),0,14);
+      const hours=clamp(n(tr.querySelector('.hours').value),0,24);
+      const weekly=days*hours;
+      const mode=tr.querySelector('.mode').value;
+      const rhEl=tr.querySelector('.rolehours');
+      rhEl.disabled=mode!=='兼務';
+      let roleWeekly=weekly;
+      if(mode==='兼務' && rhEl.value!=='') roleWeekly=clamp(n(rhEl.value),0,168);
+      if(roleWeekly>weekly+1e-9){ warnings.push(`No.${i+1}：兼務の職種別週時間が週総勤務時間を超えています。`); tr.classList.add('warnrow'); }
+      else tr.classList.remove('warnrow');
+      const full=weekly>=standard-1e-9;
+      const fte=Math.min(roleWeekly/standard,1);
+      tr.querySelector('.weekhours').textContent=fmt(weekly,2)+'時間';
+      const status=tr.querySelector('.status');
+      status.textContent=full?'常勤':'非常勤';
+      status.className='status '+(full?'full':'part');
+      tr.querySelector('.fte').textContent=fmt(fte,p);
+      const hasInput=(tr.querySelector('.days').value!=='' || tr.querySelector('.hours').value!=='' || (mode==='兼務'&&rhEl.value!==''));
+      if(hasInput && (days<=0 || hours<=0)) warnings.push(`No.${i+1}：週回数と勤務時間を確認してください。`);
+      if(days>0 && hours>0) entries.push({job,days,hours,weekly,mode,roleWeekly,full,fte});
+    });
+    return {standard,p,warnings,entries};
+  }
+
+  function summarize(entries){
+    const map=new Map(JOBS.map(j=>[j,{fullDedicated:0,fullDual:0,partDedicated:0,partDual:0,total:0,fte:0}]));
+    entries.forEach(e=>{
+      const s=map.get(e.job);
+      if(e.full && e.mode==='専従') s.fullDedicated++;
+      else if(e.full && e.mode==='兼務') s.fullDual++;
+      else if(!e.full && e.mode==='専従') s.partDedicated++;
+      else s.partDual++;
+      s.total++;
+      s.fte+=e.fte;
+    });
+    return map;
+  }
+
+  function refresh(){
+    const {standard,p,warnings,entries}=collect();
+    const map=summarize(entries);
+    summaryBody.innerHTML='';
+    JOBS.forEach(job=>{
+      const s=map.get(job);
+      const tr=document.createElement('tr');
+      const vals=[s.fullDedicated,s.fullDual,s.partDedicated,s.partDual,s.total];
+      tr.innerHTML='<td class="job">'+job+'</td>'+vals.map(v=>'<td class="'+(v===0?'zero':'')+'">'+v+'人</td>').join('')+'<td class="'+(s.fte===0?'zero':'')+'">'+fmt(s.fte,p)+'人</td>';
+      summaryBody.appendChild(tr);
+    });
+    const lines=[];
+    lines.push('1週間のうち、常勤の従業者が勤務すべき時間数：'+fmt(standard,2)+'時間');
+    lines.push('');
+    lines.push('職種\t常勤専従\t常勤兼務\t非常勤専従\t非常勤兼務\t合計\t常勤換算人数');
+    JOBS.forEach(job=>{ const s=map.get(job); lines.push([job,s.fullDedicated,s.fullDual,s.partDedicated,s.partDual,s.total,fmt(s.fte,p)].join('\t')); });
+    textResult.textContent=lines.join('\n');
+    validation.textContent=warnings.join('　');
+  }
+
+  function copyText(){
+    const text=textResult.textContent;
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(()=>flashButton('copyResult','コピーしました')).catch(()=>fallbackCopy(text)); }
+    else fallbackCopy(text);
+  }
+  function fallbackCopy(text){
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='absolute'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy'); flashButton('copyResult','コピーしました');}catch(e){alert('コピーできませんでした。下のプレビューを選択してコピーしてください。');}
+    ta.remove();
+  }
+  function flashButton(id,msg){ const b=document.getElementById(id); const old=b.textContent; b.textContent=msg; setTimeout(()=>b.textContent=old,1200); }
+  function csvEscape(v){ const s=String(v); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+  function downloadCsv(){
+    const {standard,p,entries}=collect(); const map=summarize(entries);
+    const rows=[['常勤の週所定時間',standard+'時間'],[],['職種','常勤専従','常勤兼務','非常勤専従','非常勤兼務','合計','常勤換算人数']];
+    JOBS.forEach(job=>{const s=map.get(job); rows.push([job,s.fullDedicated,s.fullDual,s.partDedicated,s.partDual,s.total,fmt(s.fte,p)]);});
+    rows.push([],['入力明細'],['職種','週回数','1回勤務時間','週総勤務時間','専従/兼務','職種別週時間','常勤/非常勤','常勤換算寄与']);
+    entries.forEach(e=>rows.push([e.job,e.days,e.hours,fmt(e.weekly,2),e.mode,fmt(e.roleWeekly,2),e.full?'常勤':'非常勤',fmt(e.fte,p)]));
+    const csv='\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='従業者集計.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function clearAll(){ if(!confirm('入力内容をすべて消去しますか？'))return; rowsEl.innerHTML=''; rowSeq=0; addRow(); }
+
+  document.getElementById('addRow').addEventListener('click',()=>addRow());
+  document.getElementById('copyResult').addEventListener('click',copyText);
+  document.getElementById('downloadCsv').addEventListener('click',downloadCsv);
+  document.getElementById('printBtn').addEventListener('click',()=>window.print());
+  document.getElementById('clearAll').addEventListener('click',clearAll);
+  standardHoursEl.addEventListener('input',refresh);
+  precisionEl.addEventListener('change',refresh);
+  addRow();
+})();
+</script>
+</body>
+</html>
