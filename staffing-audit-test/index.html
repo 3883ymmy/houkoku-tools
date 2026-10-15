@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<title>勤務表 配置監査ツール 互換版</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--text:#17202a;--muted:#667085;--line:#d9e0e8;--accent:#2457c5;--accent2:#eaf0ff;--bad:#b42318;--badbg:#fff1f0;--warn:#a15c00;--warnbg:#fff7e6;--ok:#137333;--okbg:#edf7ef;--info:#315b88;--infobg:#eef5fc}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 56px}.hero{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}.hero h1{font-size:26px;margin:0 0 8px}.hero p{margin:0;color:var(--muted);line-height:1.7}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;color:var(--muted);white-space:nowrap}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}.drop{border:2px dashed #9fb2d5;border-radius:14px;padding:26px;text-align:center;background:#f9fbff;transition:.15s}.drop.drag{border-color:var(--accent);background:var(--accent2)}
+button,.button{font:inherit;border:0;border-radius:9px;padding:10px 14px;background:var(--accent);color:#fff;cursor:pointer;font-weight:650;display:inline-flex;align-items:center;justify-content:center;min-height:42px}.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}input[type=file]{display:none}.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}.note{font-size:12px;color:var(--muted);line-height:1.65}.status{margin-top:12px;font-size:13px;min-height:20px}.status.bad{color:var(--bad)}.status.ok{color:var(--ok)}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.kpi{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fff}.kpi b{display:block;font-size:24px;margin-top:4px}.kpi span{font-size:12px;color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input[type=number],.field select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;background:#fff;font:inherit}.checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.5}.check input{margin-top:3px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px}.section-title h2{font-size:18px;margin:0}.badge{font-size:11px;border-radius:999px;padding:4px 8px;font-weight:700}.badge.bad{background:var(--badbg);color:var(--bad)}.badge.warn{background:var(--warnbg);color:var(--warn)}.badge.ok{background:var(--okbg);color:var(--ok)}.badge.info{background:var(--infobg);color:var(--info)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}table{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{background:#f8fafc;position:sticky;top:0;z-index:1;font-size:12px;color:#475467}tr:last-child td{border-bottom:0}.cell-bad{background:var(--badbg);color:var(--bad);font-weight:700}.cell-warn{background:var(--warnbg);color:var(--warn);font-weight:700}.cell-ok{background:var(--okbg);color:var(--ok)}
+.issue{border:1px solid var(--line);border-left-width:5px;border-radius:10px;padding:11px 12px;margin:8px 0;background:#fff}.issue.bad{border-left-color:var(--bad)}.issue.warn{border-left-color:var(--warn)}.issue.info{border-left-color:var(--info)}.issue strong{font-size:14px}.issue .meta{font-size:11px;color:var(--muted);margin-bottom:3px}.issue p{font-size:13px;line-height:1.55;margin:5px 0 0}.empty{text-align:center;color:var(--muted);padding:24px}.hidden{display:none!important}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.tab{background:#fff;color:#344054;border:1px solid var(--line);padding:8px 11px;min-height:auto}.tab.active{background:var(--accent2);color:var(--accent);border-color:#b8c8ef}.small{font-size:12px}.fileinfo{margin-top:10px;padding:10px;border-radius:9px;background:#f8fafc;font-size:12px;color:#475467}.foot{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;color:var(--muted);font-size:11px;line-height:1.65}
+@media(max-width:800px){.hero{display:block}.pill{margin-top:10px}.grid{grid-template-columns:repeat(2,1fr)}.rules{grid-template-columns:repeat(2,1fr)}.checks{grid-template-columns:1fr}}@media(max-width:440px){.grid,.rules{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <div><h1>勤務表 配置監査ツール</h1><p>申請用の「従業者の勤務の体制及び勤務形態一覧表」を読み込み、配置不足・勤務形態の矛盾・兼務の気になる箇所をローカルで洗い出します。</p><p class="note">Excel展開の互換処理を追加した版です。ブラウザ標準のZIP展開が使えない場合も、ページ内の処理へ自動で切り替えます。</p></div>
+    <span class="pill">外部送信なし・単体HTML</span>
+  </div>
+
+  <div class="card">
+    <div id="drop" class="drop">
+      <b>勤務表 .xlsx をここにドロップ</b><br><span class="note">または下のボタンから選択してください。ファイル内容はブラウザ内だけで処理します。</span>
+      <div class="actions"><label class="button" for="file">勤務表を選択</label><input id="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"><button id="clear" class="secondary" type="button">クリア</button></div>
+      <div id="status" class="status"></div>
+    </div>
+    <div id="fileinfo" class="fileinfo hidden"></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <div class="section-title"><h2>監査ルール</h2><span class="badge info">変更すると即再計算</span></div>
+      <p class="note">ここは「事業所で確認したい基準」を設定する欄です。法令が変わったときは数値を変えて再監査できます。初期値はこの勤務表を点検しやすい設定で、法令適合を保証するものではありません。</p>
+      <div class="rules">
+        <div class="field"><label>管理者 最低人数/日</label><input id="rManager" type="number" min="0" max="20" step="1" value="1"></div>
+        <div class="field"><label>生活相談員 最低人数/日</label><input id="rCounselor" type="number" min="0" max="20" step="1" value="1"></div>
+        <div class="field"><label>看護職員 最低人数/日</label><input id="rNurse" type="number" min="0" max="20" step="1" value="1"></div>
+        <div class="field"><label>介護職員 最低人数/日</label><input id="rCare" type="number" min="0" max="30" step="1" value="1"></div>
+        <div class="field"><label>機能訓練指導員 最低人数/日</label><input id="rFunc" type="number" min="0" max="20" step="1" value="2"></div>
+        <div class="field"><label>同一人の職種別時間 合計警告</label><input id="rDailyHours" type="number" min="1" max="24" step="0.5" value="8"></div>
+        <div class="field"><label>監査対象</label><select id="rPeriod"><option value="auto">勤務表の4週/暦月設定に従う</option><option value="28">最初の28日</option><option value="month">暦月全体</option></select></div>
+      </div>
+      <div class="checks">
+        <label class="check"><input id="cForm" type="checkbox" checked><span>勤務形態A/B（常勤）・C/D（非常勤）と週平均勤務時間の不整合を警告</span></label>
+        <label class="check"><input id="cDedicated" type="checkbox" checked><span>「専従」A/Cの職員が同じ日に別職種でも勤務していたら警告</span></label>
+        <label class="check"><input id="cOptimize" type="checkbox" checked><span>機能訓練Aが必要人数そろう日は、看護資格者の機能訓練兼務を「看護専従化候補」として表示</span></label>
+        <label class="check"><input id="cCounselHours" type="checkbox" checked><span>生活相談員のサービス提供時間内・勤務延時間が、1日のサービス提供時間を下回ったら警告</span></label>
+        <label class="check"><input id="cQual" type="checkbox" checked><span>生活相談員・看護職員・機能訓練指導員の資格欄が空欄/「ー」なら警告</span></label>
+        <label class="check"><input id="cComment" type="checkbox"><span>勤務形態B/D（兼務）なのに兼務状況欄が空欄なら警告</span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div class="kpi"><span>監査対象日</span><b id="kDays">0</b></div>
+        <div class="kpi"><span>認識した職員行</span><b id="kStaff">0</b></div>
+        <div class="kpi"><span>要修正</span><b id="kBad">0</b></div>
+        <div class="kpi"><span>要確認</span><b id="kWarn">0</b></div>
+        <div class="kpi"><span>調整候補</span><b id="kInfo">0</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>日別配置チェック</h2><div class="actions" style="margin:0"><button id="downloadCsv" class="secondary" type="button">監査結果CSV</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>日付</th><th>管理者</th><th>生活相談員</th><th>看護</th><th>介護</th><th>機能訓練</th><th>判定</th></tr></thead><tbody id="dailyBody"></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>見つかった問題・調整候補</h2><span id="issueCount" class="badge ok">0件</span></div>
+      <div class="tabs"><button class="tab active" data-filter="all" type="button">全部</button><button class="tab" data-filter="bad" type="button">要修正</button><button class="tab" data-filter="warn" type="button">要確認</button><button class="tab" data-filter="info" type="button">調整候補</button></div>
+      <div id="issues"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><h2>認識した職員</h2><span class="badge info">入力確認用</span></div>
+      <div class="table-wrap"><table><thead><tr><th>No</th><th>職種</th><th>勤務形態</th><th>資格</th><th>氏名</th><th>週平均</th></tr></thead><tbody id="staffBody"></tbody></table></div>
+    </div>
+
+    <div class="foot">このツールは勤務表の入力内容をルールベースで監査する補助ツールです。行政・指定権者による人員基準判定を代替するものではありません。最終判断は最新の指定基準・自治体の取扱い・勤務実態で確認してください。読み込んだ勤務表はブラウザ内メモリだけで扱い、ページを閉じると破棄されます。</div>
+  </div>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const state={model:null,issues:[],filter:'all'};
+const roles=['管理者','生活相談員','看護職員','介護職員','機能訓練指導員'];
+const roleIds={'管理者':'rManager','生活相談員':'rCounselor','看護職員':'rNurse','介護職員':'rCare','機能訓練指導員':'rFunc'};
+const formNames={A:'常勤・専従',B:'常勤・兼務',C:'非常勤・専従',D:'非常勤・兼務'};
+
+function u16(d,o){return d[o]|(d[o+1]<<8)}
+function u32(d,o){return (d[o]|(d[o+1]<<8)|(d[o+2]<<16)|(d[o+3]<<24))>>>0}
+function findEOCD(d){for(let i=d.length-22;i>=Math.max(0,d.length-66000);i--)if(u32(d,i)===0x06054b50)return i;throw new Error('ZIP終端情報が見つかりません')}
+function revBits(x,n){let r=0;for(let i=0;i<n;i++){r=(r<<1)|(x&1);x>>>=1}return r}
+function makeHuff(lengths){let max=0;for(const l of lengths)if(l>max)max=l;const counts=new Array(max+1).fill(0);for(const l of lengths)if(l)counts[l]++;const next=new Array(max+1).fill(0);let code=0;for(let bits=1;bits<=max;bits++){code=(code+(counts[bits-1]||0))<<1;next[bits]=code}const tables=Array.from({length:max+1},()=>new Map());for(let sym=0;sym<lengths.length;sym++){const len=lengths[sym];if(!len)continue;const c=next[len]++;tables[len].set(revBits(c,len),sym)}return {tables,max}}
+function inflateRawJS(data,expectedSize=0){let pos=0,bitbuf=0,bitcnt=0;function bits(n){while(bitcnt<n){if(pos>=data.length)throw new Error('DEFLATEデータが途中で終了しました');bitbuf|=data[pos++]<<bitcnt;bitcnt+=8}const v=bitbuf&((1<<n)-1);bitbuf>>>=n;bitcnt-=n;return v}function align(){bitbuf=0;bitcnt=0}function sym(h){let c=0;for(let len=1;len<=h.max;len++){c|=bits(1)<<(len-1);const s=h.tables[len].get(c);if(s!==undefined)return s}throw new Error('DEFLATEハフマン符号を解読できません')}
+let out=new Uint8Array(expectedSize||Math.max(1024,data.length*4)),op=0;function ensure(n){if(op+n<=out.length)return;let z=out.length;while(z<op+n)z=Math.max(z*2,op+n);const nu=new Uint8Array(z);nu.set(out);out=nu}function put(v){ensure(1);out[op++]=v}function copy(dist,len){if(dist<=0||dist>op)throw new Error('DEFLATE距離が不正です');ensure(len);for(let i=0;i<len;i++){out[op]=out[op-dist];op++}}
+const LB=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+const LE=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+const DB=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+const DE=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+let final=0;do{final=bits(1);const type=bits(2);if(type===0){align();if(pos+4>data.length)throw new Error('DEFLATE非圧縮ブロックが不正です');const len=data[pos]|data[pos+1]<<8,nlen=data[pos+2]|data[pos+3]<<8;pos+=4;if(((len^0xffff)&0xffff)!==nlen)throw new Error('DEFLATE LEN/NLEN不一致');ensure(len);out.set(data.subarray(pos,pos+len),op);op+=len;pos+=len;continue}if(type===3)throw new Error('DEFLATE予約ブロックです');let lit,dist;if(type===1){const ll=new Array(288);for(let i=0;i<=143;i++)ll[i]=8;for(let i=144;i<=255;i++)ll[i]=9;for(let i=256;i<=279;i++)ll[i]=7;for(let i=280;i<=287;i++)ll[i]=8;lit=makeHuff(ll);dist=makeHuff(new Array(32).fill(5))}else{const hlit=bits(5)+257,hdist=bits(5)+1,hclen=bits(4)+4,order=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],cl=new Array(19).fill(0);for(let i=0;i<hclen;i++)cl[order[i]]=bits(3);const ch=makeHuff(cl),lens=[];while(lens.length<hlit+hdist){const s=sym(ch);if(s<=15)lens.push(s);else if(s===16){if(!lens.length)throw new Error('DEFLATE repeat不正');const prev=lens[lens.length-1],n=bits(2)+3;for(let i=0;i<n;i++)lens.push(prev)}else if(s===17){const n=bits(3)+3;for(let i=0;i<n;i++)lens.push(0)}else if(s===18){const n=bits(7)+11;for(let i=0;i<n;i++)lens.push(0)}else throw new Error('DEFLATE code-length不正')}lit=makeHuff(lens.slice(0,hlit));dist=makeHuff(lens.slice(hlit,hlit+hdist))}
+while(true){const s=sym(lit);if(s<256){put(s);continue}if(s===256)break;if(s<257||s>285)throw new Error('DEFLATE length symbol不正');const li=s-257,len=LB[li]+(LE[li]?bits(LE[li]):0),ds=sym(dist);if(ds>29)throw new Error('DEFLATE distance symbol不正');const dd=DB[ds]+(DE[ds]?bits(DE[ds]):0);copy(dd,len)}}while(!final);return out.slice(0,op)}
+
+async function inflateRaw(bytes,expectedSize=0){if(typeof DecompressionStream!=='undefined'){try{const ds=new DecompressionStream('deflate-raw');return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer())}catch(e){console.warn('ブラウザ標準のdeflate-raw展開に失敗したため互換展開へ切替:',e)}}return inflateRawJS(bytes,expectedSize)}
+async function unzipXlsx(buf){const d=new Uint8Array(buf),e=findEOCD(d),count=u16(d,e+10),cd=u32(d,e+16),dec=new TextDecoder('utf-8'),entries=new Map();let p=cd;for(let n=0;n<count;n++){if(u32(d,p)!==0x02014b50)throw new Error('ZIP中央ディレクトリを読めません');const method=u16(d,p+10),cs=u32(d,p+20),us=u32(d,p+24),nl=u16(d,p+28),el=u16(d,p+30),cl=u16(d,p+32),lo=u32(d,p+42),name=dec.decode(d.slice(p+46,p+46+nl));entries.set(name,{method,cs,us,lo});p+=46+nl+el+cl}
+async function get(name){name=name.replace(/^\//,'');const en=entries.get(name);if(!en)throw new Error('Excel内部ファイルが見つかりません: '+name);const lo=en.lo;if(u32(d,lo)!==0x04034b50)throw new Error('ZIPローカルヘッダを読めません');const nl=u16(d,lo+26),el=u16(d,lo+28),start=lo+30+nl+el,comp=d.slice(start,start+en.cs);if(en.method===0)return comp;if(en.method===8)return await inflateRaw(comp,en.us);throw new Error('未対応のZIP圧縮方式です: '+en.method)}
+return {get,has:n=>entries.has(n.replace(/^\//,''))}}
+function xml(bytes){const s=new TextDecoder('utf-8').decode(bytes),doc=new DOMParser().parseFromString(s,'application/xml');if(doc.getElementsByTagName('parsererror').length)throw new Error('Excel内部XMLを解析できません');return doc}
+function allNS(node,name){return Array.from(node.getElementsByTagNameNS('*',name))}
+async function parseWorkbook(buf){const zip=await unzipXlsx(buf),wb=xml(await zip.get('xl/workbook.xml')),rels=xml(await zip.get('xl/_rels/workbook.xml.rels'));const relMap={};for(const r of allNS(rels,'Relationship'))relMap[r.getAttribute('Id')]=r.getAttribute('Target');let shared=[];if(zip.has('xl/sharedStrings.xml')){const ss=xml(await zip.get('xl/sharedStrings.xml'));shared=allNS(ss,'si').map(si=>allNS(si,'t').map(t=>t.textContent||'').join(''))}
+const sheets=[];for(const s of allNS(wb,'sheet')){const rid=s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')||s.getAttribute('r:id'),target=relMap[rid];if(!target)continue;let path=target.replace(/^\//,'');if(!path.startsWith('xl/'))path='xl/'+path.replace(/^\.\//,'');sheets.push({name:s.getAttribute('name'),path})}
+async function readSheet(info){const doc=xml(await zip.get(info.path)),m=new Map();for(const c of allNS(doc,'c')){const ref=c.getAttribute('r'),t=c.getAttribute('t'),v=allNS(c,'v')[0],is=allNS(c,'is')[0];let val='';if(t==='s'&&v)val=shared[Number(v.textContent)]??'';else if(t==='inlineStr'&&is)val=allNS(is,'t').map(x=>x.textContent||'').join('');else if(v)val=v.textContent??'';m.set(ref,val)}return m}
+let mainInfo=sheets.find(s=>/^R\d+\./.test(s.name))||sheets[0],main=await readSheet(mainInfo);if(!String(main.get('C17')||'').includes('職種')){for(const si of sheets){const tmp=await readSheet(si);if(String(tmp.get('C17')||'').includes('職種')){mainInfo=si;main=tmp;break}}}
+const shiftInfo=sheets.find(s=>s.name==='シフト記号表（勤務時間帯）')||sheets.find(s=>s.name.includes('シフト記号表（勤務時間帯）')&&!s.name.includes('記載例'));if(!shiftInfo)throw new Error('「シフト記号表（勤務時間帯）」シートが見つかりません');const shift=await readSheet(shiftInfo);return buildModel(main,shift,mainInfo.name)}
+function col(n){let s='';while(n){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26)}return s}
+function str(m,a){return String(m.get(a)??'').trim()}
+function num(m,a){const n=Number(m.get(a));return Number.isFinite(n)?n:0}
+function excelTime(v){const n=Number(v);return Number.isFinite(n)&&v!==''?n*24:null}
+function buildModel(main,shift,sheetName){const shiftMap=new Map();for(let r=6;r<=120;r++){const sym=str(shift,'C'+r);if(!sym)continue;shiftMap.set(sym,{symbol:sym,start:excelTime(str(shift,'E'+r)),end:excelTime(str(shift,'G'+r)),breakHours:excelTime(str(shift,'I'+r)),hours:num(shift,'K'+r),serviceStart:excelTime(str(shift,'Q'+r)),serviceEnd:excelTime(str(shift,'S'+r)),serviceHours:num(shift,'U'+r),note:str(shift,'W'+r)})}
+const staff=[];for(let r=1;r<=500;r++){const no=str(main,'B'+r),role=str(main,'C'+r),name=str(main,'L'+r);if(!/^\d+$/.test(no)||!role||!name)continue;if(!roles.includes(role))continue;const days=[];for(let d=0;d<31;d++){const c=col(19+d),symbol=str(main,c+r),sh=shiftMap.get(symbol),cachedTotal=num(main,c+(r+1)),cachedService=num(main,c+(r+2));days.push({symbol,totalHours:sh?sh.hours:cachedTotal,serviceHours:sh?sh.serviceHours:cachedService,start:sh?.start??null,end:sh?.end??null,note:sh?.note||'',known:!symbol||symbol==='-'||shiftMap.has(symbol)})}staff.push({row:r,no:Number(no),role,form:str(main,'G'+r),qual:str(main,'H'+r),name,comment:str(main,'BB'+r),weekly:num(main,'AZ'+(r+1)),days})}
+const year=Math.round(num(main,'AC2'))||null,month=Math.round(num(main,'AG2'))||null,mode=str(main,'BB3')||'４週',monthDays=Math.round(num(main,'BB8'))||31,fulltime=num(main,'AX6')||40;const weekdays=[];for(let d=0;d<31;d++)weekdays.push(str(main,col(19+d)+'21'));let serviceSpan=0;for(const sh of shiftMap.values()){if(sh.serviceStart!=null&&sh.serviceEnd!=null&&sh.serviceEnd>sh.serviceStart){serviceSpan=sh.serviceEnd-sh.serviceStart;break}}
+const requiredCare=[];for(let d=0;d<31;d++)requiredCare.push(num(main,col(19+d)+'103'));
+return {sheetName,staff,shiftMap,year,month,mode,monthDays,fulltime,weekdays,serviceSpan,requiredCare}}
+function targetDays(m){const v=$('rPeriod').value;if(v==='28')return Math.min(28,m.monthDays);if(v==='month')return Math.min(31,m.monthDays);return m.mode==='４週'?Math.min(28,m.monthDays):Math.min(31,m.monthDays)}
+function rule(role){return Math.max(0,Number($(roleIds[role]).value)||0)}
+function active(rec,d){return rec.days[d]&&rec.days[d].serviceHours>0}
+function uniqActive(m,role,d){return [...new Set(m.staff.filter(r=>r.role===role&&active(r,d)).map(r=>r.name))]}
+function dateLabel(m,d){return (m.month?m.month+'/':'')+(d+1)+(m.weekdays[d]?'('+m.weekdays[d]+')':'')}
+function issue(severity,type,d,title,text,person=''){return {severity,type,day:d,title,text,person}}
+function audit(){const m=state.model;if(!m)return;const days=targetDays(m),issues=[],daily=[];const minRules=Object.fromEntries(roles.map(r=>[r,rule(r)]));
+for(let d=0;d<days;d++){const open=m.staff.some(r=>r.role!=='管理者'&&active(r,d));if(!open){daily.push({d,open:false,counts:{}});continue}const counts={};for(const role of roles)counts[role]=uniqActive(m,role,d).length;let dayBad=false,dayWarn=false;for(const role of roles){const min=minRules[role];if(counts[role]<min){issues.push(issue('bad','配置不足',d,role+'が不足',`${dateLabel(m,d)}：${role} ${counts[role]}人 / 設定 ${min}人`));dayBad=true}}
+if($('cCounselHours').checked&&m.serviceSpan>0){const h=m.staff.filter(r=>r.role==='生活相談員').reduce((s,r)=>s+(r.days[d]?.serviceHours||0),0);if(h+1e-6<m.serviceSpan){issues.push(issue('warn','勤務延時間',d,'生活相談員の勤務延時間が短い',`${dateLabel(m,d)}：サービス提供時間内 ${h.toFixed(1)}時間 / サービス提供時間 ${m.serviceSpan.toFixed(1)}時間`));dayWarn=true}}
+const req=m.requiredCare[d]||0;if(req>0){const h=m.staff.filter(r=>r.role==='介護職員').reduce((s,r)=>s+(r.days[d]?.serviceHours||0),0);if(h+1e-6<req){issues.push(issue('bad','介護職員必要時間',d,'介護職員の必要勤務時間を下回る',`${dateLabel(m,d)}：${h.toFixed(1)}時間 / 勤務表が示す必要時間 ${req.toFixed(1)}時間`));dayBad=true}}
+const byName=new Map();for(const r of m.staff){if(active(r,d)){if(!byName.has(r.name))byName.set(r.name,[]);byName.get(r.name).push(r)}}for(const [name,recs] of byName){if(recs.length>1){const sum=recs.reduce((s,r)=>s+(r.days[d]?.totalHours||0),0),limit=Math.max(1,Number($('rDailyHours').value)||8);if(sum>limit+1e-6){issues.push(issue('warn','兼務時間',d,'職種別の入力時間合計が大きい',`${dateLabel(m,d)}：${name} は ${recs.map(r=>r.role).join('＋')} で合計 ${sum.toFixed(1)}時間。重複計上または時間配分を確認してください。`,name));dayWarn=true}if($('cDedicated').checked&&recs.some(r=>r.form==='A'||r.form==='C')){issues.push(issue('warn','専従と兼務',d,'専従行と別職種勤務が同日にある',`${dateLabel(m,d)}：${name} は ${recs.map(r=>`${r.role}(${r.form||'?'})`).join(' / ')}。専従の扱いを確認してください。`,name));dayWarn=true}}}
+if($('cOptimize').checked){const funcMin=minRules['機能訓練指導員'],aFunc=m.staff.filter(r=>r.role==='機能訓練指導員'&&r.form==='A'&&active(r,d)).length;if(aFunc>=funcMin&&funcMin>0){const dual=m.staff.filter(r=>r.role==='機能訓練指導員'&&active(r,d)&&(r.form==='B'||r.form==='D')&&/(看護師|准看護師)/.test(r.qual));for(const r of dual)issues.push(issue('info','看護専従化候補',d,'看護専従へ戻せる候補',`${dateLabel(m,d)}：機能訓練指導員Aが ${aFunc}人いて設定人数を満たしています。${r.name} の機能訓練兼務を外し、看護側へ寄せられるか確認できます。`,r.name))}}
+for(const target of roles){if(counts[target]>=minRules[target]||minRules[target]===0)continue;const need=minRules[target]-counts[target],cands=[];const peopleWithTarget=new Set(m.staff.filter(r=>r.role===target).map(r=>r.name));for(const name of peopleWithTarget){const targetRow=m.staff.find(r=>r.role===target&&r.name===name);if(!targetRow||active(targetRow,d))continue;const donor=m.staff.find(r=>r.name===name&&r.role!==target&&active(r,d));if(!donor)continue;const donorCount=counts[donor.role]??0;if(donorCount-1>=minRules[donor.role])cands.push(`${name}（${donor.role}→${target}）`)}if(cands.length)issues.push(issue('info','再配置候補',d,target+'不足の再配置候補',`${dateLabel(m,d)}：勤務日を変えずに検討できる候補 ${cands.join('、')}。必要 ${need}人。`));else if(target==='看護職員')issues.push(issue('info','再配置候補',d,'勤務日固定では看護不足を解消しにくい',`${dateLabel(m,d)}：同日出勤者の兼務切替だけでは看護職員の設定人数に届く候補を見つけられませんでした。`))}
+daily.push({d,open:true,counts,status:dayBad?'bad':dayWarn?'warn':'ok'})}
+if($('cForm').checked){const personWeekly=new Map();for(const r of m.staff)personWeekly.set(r.name,(personWeekly.get(r.name)||0)+r.weekly);for(const r of m.staff){if(!'ABCD'.includes(r.form))continue;const isFull=r.form==='A'||r.form==='B',basis=(r.form==='A'||r.form==='C')?r.weekly:(personWeekly.get(r.name)||r.weekly),diff=basis-m.fulltime,label=(r.form==='A'||r.form==='C')?'当該職種':'この勤務表内の全職種合計';if(isFull&&diff<-0.01)issues.push(issue('warn','勤務形態',null,'常勤区分と週平均時間を確認',`${r.name}（${r.role}・${r.form}）は${label}で週平均 ${basis.toFixed(2)}時間、事業所の常勤所定 ${m.fulltime.toFixed(2)}時間です。休暇・他事業所兼務等を含め、区分を確認してください。`,r.name));if(!isFull&&diff>=-0.01)issues.push(issue('warn','勤務形態',null,'非常勤区分と週平均時間を確認',`${r.name}（${r.role}・${r.form}）は${label}で週平均 ${basis.toFixed(2)}時間となり、常勤所定 ${m.fulltime.toFixed(2)}時間以上です。区分を確認してください。`,r.name))}}
+if($('cQual').checked){for(const r of m.staff){if(['生活相談員','看護職員','機能訓練指導員'].includes(r.role)&&(!r.qual||r.qual==='ー'||r.qual==='-'))issues.push(issue('warn','資格欄',null,'資格欄を確認',`${r.name}（${r.role}）の資格欄が空欄または「ー」です。`,r.name))}}
+if($('cComment').checked){for(const r of m.staff){if((r.form==='B'||r.form==='D')&&!r.comment)issues.push(issue('warn','兼務状況欄',null,'兼務状況欄が空欄',`${r.name}（${r.role}・${r.form}）は兼務区分ですが、兼務状況欄が空欄です。`,r.name))}}
+for(const r of m.staff){for(let d=0;d<days;d++){const x=r.days[d];if(x.symbol&&x.symbol!=='-'&&!x.known)issues.push(issue('bad','未登録シフト',d,'シフト記号が未登録',`${dateLabel(m,d)}：${r.name}（${r.role}）の「${x.symbol}」がシフト記号表にありません。`,r.name))}}
+state.issues=issues;render(daily,issues,days)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(daily,issues,days){const m=state.model;$('kDays').textContent=daily.filter(x=>x.open).length;$('kStaff').textContent=m.staff.length;$('kBad').textContent=issues.filter(x=>x.severity==='bad').length;$('kWarn').textContent=issues.filter(x=>x.severity==='warn').length;$('kInfo').textContent=issues.filter(x=>x.severity==='info').length;$('issueCount').textContent=issues.length+'件';$('issueCount').className='badge '+(issues.some(x=>x.severity==='bad')?'bad':issues.some(x=>x.severity==='warn')?'warn':'ok');
+$('dailyBody').innerHTML=daily.map(x=>{if(!x.open)return `<tr><td>${esc(dateLabel(m,x.d))}</td><td colspan="5" style="color:#98a2b3">休業日/配置なし</td><td>－</td></tr>`;const cells=roles.map(r=>{const n=x.counts[r]||0,min=rule(r),cls=n<min?'cell-bad':'cell-ok';return `<td class="${cls}">${n} / ${min}</td>`}).join('');return `<tr><td>${esc(dateLabel(m,x.d))}</td>${cells}<td><span class="badge ${x.status==='bad'?'bad':x.status==='warn'?'warn':'ok'}">${x.status==='bad'?'要修正':x.status==='warn'?'要確認':'OK'}</span></td></tr>`}).join('');
+$('staffBody').innerHTML=m.staff.map(r=>`<tr><td>${r.no}</td><td>${esc(r.role)}</td><td>${esc(r.form)} ${esc(formNames[r.form]||'')}</td><td>${esc(r.qual)}</td><td>${esc(r.name)}</td><td>${r.weekly?Number(r.weekly).toFixed(2):'0.00'}h</td></tr>`).join('');renderIssues()}
+function renderIssues(){const list=state.filter==='all'?state.issues:state.issues.filter(x=>x.severity===state.filter),box=$('issues');if(!list.length){box.innerHTML='<div class="empty">この条件では該当項目はありません。</div>';return}box.innerHTML=list.map(x=>`<div class="issue ${x.severity}"><div class="meta">${x.severity==='bad'?'要修正':x.severity==='warn'?'要確認':'調整候補'} ・ ${esc(x.type)}${x.day!=null?' ・ '+esc(dateLabel(state.model,x.day)):''}</div><strong>${esc(x.title)}</strong><p>${esc(x.text)}</p></div>`).join('')}
+function csv(){if(!state.model)return;const rows=[['重要度','種別','日付','タイトル','内容','氏名']];for(const x of state.issues)rows.push([x.severity,x.type,x.day==null?'':dateLabel(state.model,x.day),x.title,x.text,x.person]);const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',text='\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='勤務表_配置監査結果.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function load(file){$('status').className='status';$('status').textContent='勤務表を読み込んでいます…';try{const model=await parseWorkbook(await file.arrayBuffer());if(!model.staff.length)throw new Error('職員行を認識できませんでした。この標準様式と異なる勤務表の可能性があります。');state.model=model;$('app').classList.remove('hidden');$('fileinfo').classList.remove('hidden');$('fileinfo').textContent=`${file.name} ｜ シート: ${model.sheetName} ｜ ${model.year||''}年${model.month||''}月 ｜ ${model.mode} ｜ 常勤所定 ${model.fulltime}時間/週 ｜ 職員行 ${model.staff.length}件`;$('status').className='status ok';$('status').textContent='読み込み完了。監査しました。';audit()}catch(e){console.error(e);state.model=null;$('app').classList.add('hidden');$('fileinfo').classList.add('hidden');$('status').className='status bad';$('status').textContent='読み込みエラー：'+(e?.message||e)}}
+function clearAll(){state.model=null;state.issues=[];$('file').value='';$('app').classList.add('hidden');$('fileinfo').classList.add('hidden');$('status').textContent='';$('drop').classList.remove('drag')}
+$('file').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)load(f)});$('clear').addEventListener('click',clearAll);$('downloadCsv').addEventListener('click',csv);const drop=$('drop');for(const ev of ['dragenter','dragover'])drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')});for(const ev of ['dragleave','drop'])drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')});drop.addEventListener('drop',e=>{const f=e.dataTransfer.files?.[0];if(f)load(f)});
+for(const id of Object.values(roleIds).concat(['rDailyHours','rPeriod','cForm','cDedicated','cOptimize','cCounselHours','cQual','cComment']))$(id).addEventListener('change',()=>{if(state.model)audit()});document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.filter=b.dataset.filter;renderIssues()}));
+})();
+</script>
+</body>
+</html>
